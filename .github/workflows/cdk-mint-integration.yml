@@ -21,6 +21,24 @@ jobs:
       - name: Check running containers
         run: docker ps
 
+      - name: Check system and glibc versions
+        run: |
+          echo "=== UBUNTU VERSION ==="
+          lsb_release -a || true
+          echo
+          cat /etc/os-release
+          echo
+
+          echo "=== GLIBC VERSION ==="
+          ldd --version || true
+          echo
+          /lib/x86_64-linux-gnu/libc.so.6 2>&1 | head -n1 || true
+          echo
+
+          echo "=== AVAILABLE GLIBC VERSIONS ==="
+          strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC_ | sort -V | tail -10 || true
+          echo
+
       - name: Check container logs
         run: docker logs cdk-mint
 
