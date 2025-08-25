@@ -21,6 +21,9 @@ jobs:
       - name: Check running containers
         run: docker ps
 
+      - name: Check container logs
+        run: docker logs cdk-mint
+
 #      - name: Sleep 5 seconds and curl on localhost:3338/v1/info
 #        run: |
 #          sleep 30
@@ -39,6 +42,9 @@ jobs:
           done
           echo "Mint did not start in time"
           exit 1
+
+      - name: Check container logs again
+        run: docker logs cdk-mint
 
       - name: Checkout cashu-ts repository
         uses: actions/checkout@v4
