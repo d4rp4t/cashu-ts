@@ -22,7 +22,7 @@ jobs:
 
       - name: Sleep 5 seconds and curl on localhost:3338/v1/info
         run: |
-          sleep 5
+          sleep 30
           curl localhost:3338/v1/info
 
       - name: Checkout cashu-ts repository
