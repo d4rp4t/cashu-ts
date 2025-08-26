@@ -17,7 +17,6 @@ jobs:
           -e CDK_MINTD_LISTEN_PORT=3338 \
           -e CDK_MINTD_MNEMONIC='abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about' \
           cashubtc/mintd:latest-amd64 \
-          cdk-mintd
       - name: Check running containers
         run: docker ps
 
