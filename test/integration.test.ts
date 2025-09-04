@@ -294,7 +294,7 @@ describe('mint api', () => {
 			pubkey: bytesToHex(pubKeyBob),
 		});
 
-		const meltRequest = await wallet.createMeltQuote(externalInvoices[3]);
+		const meltRequest = await wallet.createMeltQuote(externalInvoices[2]);
 		const fee = meltRequest.fee_reserve;
 		expect(fee).toBeGreaterThan(0);
 		const response = await wallet.meltProofs(meltRequest, proofs, {
