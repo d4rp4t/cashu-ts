@@ -31,9 +31,9 @@ import { hexToBytes, bytesToHex, randomBytes } from '@noble/hashes/utils';
 dns.setDefaultResultOrder('ipv4first');
 
 const externalInvoices = [
-		'lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju',
-		'lnbc20u1p5tj77hsp5hva2cwk48eajjatzje0wwyanfl2dmu87h7c30mnurfmu5mr6ypjspp53cmmk6mgvdrp7xpuf9vfyqyxjl5ce9dqs4prc6jh6eqf5ldmqvvshp55qf3c2rxuxqahgt2d7yp6xdrjdt5r2sm2uqsatyn3v7u0k09mnhqxq9z0rgqcqpnrzjq0xp6zfjhwvmq6tltd09jcdc82ml6eh3alzvnaw8httxcx7tu78syrvfkqqqm0qqqyqqqqlgqqqvx5qqjq9qxpqysgqunatemrzxl5srnxy4jpqeu4rhdfvkx0agvqeumkmx4mvsusc2er4t4h9jg396mfxp0lu72nueehapde6cv42ldd80pryz8jrxky3k5qqm6f4zx',
-		'lnbc20u1p5tjlpesp5a3gqad20nvqa3jayfuwtq8nacnp02xr4ssehmx6q5xuhh95fknkspp5xtf7fmw3wkzxw4y5jgcl4n840m4wx8hma9x5s3htjvzwfr2jp84qhp5hzgsaq6rcx28pvc258nxmtq99drflkwcng5n7lncdpwlv0hjfnrqxq9z0rgqcqpnrzjqv3dpepm8kfdxrk3sl6wzqdf49s9c0h9ljtjrek6c08r6aejlwcnurwpxqqqzuqqqyqqqqqqqqqq86qqjq9qxpqysgqjl8rvrcynj4aewex3lrh86y6p4hr5hj484md2820vcfn9rehjj75ydceg64x9jgntlflquyqt3uad7t32dr2z9lv7c5e7uhuurwy9vspftf0jl'
+	'lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju',
+	'lnbc20u1p5tj77hsp5hva2cwk48eajjatzje0wwyanfl2dmu87h7c30mnurfmu5mr6ypjspp53cmmk6mgvdrp7xpuf9vfyqyxjl5ce9dqs4prc6jh6eqf5ldmqvvshp55qf3c2rxuxqahgt2d7yp6xdrjdt5r2sm2uqsatyn3v7u0k09mnhqxq9z0rgqcqpnrzjq0xp6zfjhwvmq6tltd09jcdc82ml6eh3alzvnaw8httxcx7tu78syrvfkqqqm0qqqyqqqqlgqqqvx5qqjq9qxpqysgqunatemrzxl5srnxy4jpqeu4rhdfvkx0agvqeumkmx4mvsusc2er4t4h9jg396mfxp0lu72nueehapde6cv42ldd80pryz8jrxky3k5qqm6f4zx',
+	'lnbc20u1p5tnrdtsp5xaus66jztyj4f4m9wuza7ay9994d5dals6dluvw80dduhhulgxvspp5gsdp48uz9x20etle8j7muweujzxd2w4ay2v6cwzwjy7pff44r4gqhp5jujtt4hgd57c5hskstzkjkxqtfmctfvpfc3wmt3h42a9f2p9sqcsxq9z0rgqcqpnrzjqvxr759n8jl5226n47zw6325pyffxqlpyrjh9ztswvnglhrmtcsfzrw8mqqqf2cqqqqqqqlgqqqqzhsqjq9qxpqysgq2rtnpkqzmwmuf6cw653s63552qf0hgst6xzdywkgekhz836ayrz572cm72r7ejj7w0ktgldlwfu33fpr9dxywx5wqy4tte7smpa9q4gqaaydvv',
 ];
 
 let request: Record<string, string> | undefined;
@@ -42,9 +42,8 @@ const unit = 'sat';
 
 const SECOND = 1000;
 const sleep = async (ms: number) => {
-	return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
+	return new Promise((resolve) => setTimeout(resolve, ms));
+};
 
 injectWebSocketImpl(ws);
 
@@ -343,65 +342,73 @@ describe('mint api', () => {
 		expect(res).toBe(1);
 		expect(callback).toBeCalled();
 	});
-	test('websocket mint quote updates on multiple ids', async () => {
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint);
+	test(
+		'websocket mint quote updates on multiple ids',
+		async () => {
+			const mint = new CashuMint(mintUrl);
+			const wallet = new CashuWallet(mint);
 
-		const mintQuote1 = await wallet.createMintQuote(21);
-		const mintQuote2 = await wallet.createMintQuote(22);
+			const mintQuote1 = await wallet.createMintQuote(21);
+			const mintQuote2 = await wallet.createMintQuote(22);
 
-		const callbackRef = vi.fn();
-		const res = await new Promise(async (res, rej) => {
-			let counter = 0;
-			const unsub = await wallet.onMintQuoteUpdates(
-				[mintQuote1.quote, mintQuote2.quote],
-				() => {
-					counter++;
-					callbackRef();
-					if (counter === 4) {
-						unsub();
-						res(1);
-					}
-				},
-				() => {
-					counter++;
-					if (counter === 4) {
-						unsub();
-						rej();
-					}
-				},
-			);
-		});
-		mint.disconnectWebSocket();
-		expect(res).toBe(1);
-		expect(callbackRef).toHaveBeenCalledTimes(4);
-		expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
-	}, 30*SECOND);
-	test('websocket proof state + mint quote updates', async () => {
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint);
+			const callbackRef = vi.fn();
+			const res = await new Promise(async (res, rej) => {
+				let counter = 0;
+				const unsub = await wallet.onMintQuoteUpdates(
+					[mintQuote1.quote, mintQuote2.quote],
+					() => {
+						counter++;
+						callbackRef();
+						if (counter === 4) {
+							unsub();
+							res(1);
+						}
+					},
+					() => {
+						counter++;
+						if (counter === 4) {
+							unsub();
+							rej();
+						}
+					},
+				);
+			});
+			mint.disconnectWebSocket();
+			expect(res).toBe(1);
+			expect(callbackRef).toHaveBeenCalledTimes(4);
+			expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
+		},
+		30 * SECOND,
+	);
+	test(
+		'websocket proof state + mint quote updates',
+		async () => {
+			const mint = new CashuMint(mintUrl);
+			const wallet = new CashuWallet(mint);
 
-		const quote = await wallet.createMintQuote(63);
-		await new Promise((res, rej) => {
-			wallet.onMintQuotePaid(quote.quote, res, rej);
-		});
-		const proofs = await wallet.mintProofs(63, quote.quote);
-		const data = await new Promise<ProofState>((res) => {
-			wallet.onProofStateUpdates(
-				proofs,
-				(p) => {
-					if (p.state === CheckStateEnum.SPENT) {
-						res(p);
-					}
-				},
-				(e) => {
-					console.log(e);
-				},
-			);
-			wallet.swap(21, proofs);
-		});
-		mint.disconnectWebSocket();
-	}, 30*SECOND);
+			const quote = await wallet.createMintQuote(63);
+			await new Promise((res, rej) => {
+				wallet.onMintQuotePaid(quote.quote, res, rej);
+			});
+			const proofs = await wallet.mintProofs(63, quote.quote);
+			const data = await new Promise<ProofState>((res) => {
+				wallet.onProofStateUpdates(
+					proofs,
+					(p) => {
+						if (p.state === CheckStateEnum.SPENT) {
+							res(p);
+						}
+					},
+					(e) => {
+						console.log(e);
+					},
+				);
+				wallet.swap(21, proofs);
+			});
+			mint.disconnectWebSocket();
+		},
+		30 * SECOND,
+	);
 	test('mint with signed quote and payload', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
@@ -683,18 +690,22 @@ describe('Keep Vector and Reordering', () => {
 	});
 });
 describe('Wallet Restore', () => {
-	test('Using batch restore', async () => {
-		const seed = randomBytes(64);
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint, { bip39seed: seed });
+	test(
+		'Using batch restore',
+		async () => {
+			const seed = randomBytes(64);
+			const mint = new CashuMint(mintUrl);
+			const wallet = new CashuWallet(mint, { bip39seed: seed });
 
-		const mintQuote = await wallet.createMintQuote(70);
-		await sleep(3500);
-		const proofs = await wallet.mintProofs(70, mintQuote.quote, { counter: 5 });
+			const mintQuote = await wallet.createMintQuote(70);
+			await sleep(3500);
+			const proofs = await wallet.mintProofs(70, mintQuote.quote, { counter: 5 });
 
-		const { proofs: restoredProofs, lastCounterWithSignature } = await wallet.batchRestore();
-		expect(restoredProofs).toEqual(proofs);
-		expect(sumProofs(restoredProofs)).toBe(70);
-		expect(lastCounterWithSignature).toBe(7);
-	}, 30*SECOND);
+			const { proofs: restoredProofs, lastCounterWithSignature } = await wallet.batchRestore();
+			expect(restoredProofs).toEqual(proofs);
+			expect(sumProofs(restoredProofs)).toBe(70);
+			expect(lastCounterWithSignature).toBe(7);
+		},
+		30 * SECOND,
+	);
 });
