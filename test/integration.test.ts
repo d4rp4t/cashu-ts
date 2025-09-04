@@ -30,8 +30,11 @@ import { OutputData, OutputDataFactory } from '../src/model/OutputData';
 import { hexToBytes, bytesToHex, randomBytes } from '@noble/hashes/utils';
 dns.setDefaultResultOrder('ipv4first');
 
-const externalInvoice =
-	'lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju';
+const externalInvoices = [
+		'lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju',
+		'lnbc20u1p5tj77hsp5hva2cwk48eajjatzje0wwyanfl2dmu87h7c30mnurfmu5mr6ypjspp53cmmk6mgvdrp7xpuf9vfyqyxjl5ce9dqs4prc6jh6eqf5ldmqvvshp55qf3c2rxuxqahgt2d7yp6xdrjdt5r2sm2uqsatyn3v7u0k09mnhqxq9z0rgqcqpnrzjq0xp6zfjhwvmq6tltd09jcdc82ml6eh3alzvnaw8httxcx7tu78syrvfkqqqm0qqqyqqqqlgqqqvx5qqjq9qxpqysgqunatemrzxl5srnxy4jpqeu4rhdfvkx0agvqeumkmx4mvsusc2er4t4h9jg396mfxp0lu72nueehapde6cv42ldd80pryz8jrxky3k5qqm6f4zx',
+		'lnbc20u1p5tjlpesp5a3gqad20nvqa3jayfuwtq8nacnp02xr4ssehmx6q5xuhh95fknkspp5xtf7fmw3wkzxw4y5jgcl4n840m4wx8hma9x5s3htjvzwfr2jp84qhp5hzgsaq6rcx28pvc258nxmtq99drflkwcng5n7lncdpwlv0hjfnrqxq9z0rgqcqpnrzjqv3dpepm8kfdxrk3sl6wzqdf49s9c0h9ljtjrek6c08r6aejlwcnurwpxqqqzuqqqyqqqqqqqqqq86qqjq9qxpqysgqjl8rvrcynj4aewex3lrh86y6p4hr5hj484md2820vcfn9rehjj75ydceg64x9jgntlflquyqt3uad7t32dr2z9lv7c5e7uhuurwy9vspftf0jl'
+];
 
 let request: Record<string, string> | undefined;
 const mintUrl = 'http://localhost:3338';
@@ -111,7 +114,7 @@ describe('mint api', () => {
 	test('get fee for external invoice', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint, { unit });
-		const fee = (await wallet.createMeltQuote(externalInvoice)).fee_reserve;
+		const fee = (await wallet.createMeltQuote(externalInvoices[0])).fee_reserve;
 		expect(fee).toBeDefined();
 		// because external invoice, fee should be > 0
 		expect(fee).toBeGreaterThan(0);
@@ -162,7 +165,7 @@ describe('mint api', () => {
 		await sleep(3500);
 		const proofs = await wallet.mintProofs(3000, request.quote);
 
-		const meltQuote = await wallet.createMeltQuote(externalInvoice);
+		const meltQuote = await wallet.createMeltQuote(externalInvoices[1]);
 		const fee = meltQuote.fee_reserve;
 		expect(fee).toBeGreaterThan(0);
 
@@ -291,7 +294,7 @@ describe('mint api', () => {
 			pubkey: bytesToHex(pubKeyBob),
 		});
 
-		const meltRequest = await wallet.createMeltQuote(externalInvoice);
+		const meltRequest = await wallet.createMeltQuote(externalInvoices[3]);
 		const fee = meltRequest.fee_reserve;
 		expect(fee).toBeGreaterThan(0);
 		const response = await wallet.meltProofs(meltRequest, proofs, {
