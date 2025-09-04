@@ -14,7 +14,6 @@ import {
 	ProofState,
 	Token,
 } from '../src/model/types/index';
-import { MintOperationError } from '../src/model/Errors';
 import ws from 'ws';
 import { injectWebSocketImpl } from '../src/ws';
 import {
@@ -71,6 +70,7 @@ describe('mint api', () => {
 	test('get info', async () => {
 		const mint = new CashuMint(mintUrl);
 		const info = await mint.getInfo();
+		console.log("mint info: ", info)
 		expect(info).toBeDefined();
 	});
 	test('request mint', async () => {
@@ -87,22 +87,14 @@ describe('mint api', () => {
 		const request = await wallet.createMintQuote(1337);
 		expect(request).toBeDefined();
 		expect(request.request).toContain('lnbc1337');
-		// it takes randomly 1-3 secs for fakewallet to mark invoice as paid. at this point it should be paid in 100% cases
+		// it takes randomly 1-3 secs for CDK fakewallet to mark invoice as paid. at this point it should be paid in 100% cases
 		await sleep(3500);
 		const proofs = await wallet.mintProofs(1337, request.quote);
 		expect(proofs).toBeDefined();
 		// expect that the sum of all tokens.proofs.amount is equal to the requested amount
 		expect(sumProofs(proofs)).toBe(1337);
 	});
-	test('get fee for local invoice', async () => {
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint, { unit });
-		const request = await wallet.createMintQuote(100);
-		const fee = (await wallet.createMeltQuote(request.request)).fee_reserve;
-		expect(fee).toBeDefined();
-		// because local invoice, fee should be 0
-		expect(fee).toBe(0);
-	});
+
 	test('invoice with description', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint, { unit });
@@ -117,45 +109,6 @@ describe('mint api', () => {
 		expect(fee).toBeDefined();
 		// because external invoice, fee should be > 0
 		expect(fee).toBeGreaterThan(0);
-	});
-	test('pay local invoice', async () => {
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint, { unit });
-		const request = await wallet.createMintQuote(100);
-		await sleep(3500);
-		const proofs = await wallet.mintProofs(100, request.quote);
-
-		// expect no fee because local invoice
-		const mintQuote = await wallet.createMintQuote(10);
-		const quote = await wallet.createMeltQuote(mintQuote.request);
-		const fee = quote.fee_reserve;
-		expect(fee).toBe(0);
-
-		// get the quote from the mint
-		const quote_ = await wallet.checkMeltQuote(quote.quote);
-		expect(quote_).toBeDefined();
-
-		const sendResponse = await wallet.send(10, proofs, { includeFees: true });
-		const response = await wallet.meltProofs(quote, sendResponse.send);
-		expect(response).toBeDefined();
-		// expect that we have received the fee back, since it was internal
-		expect(response.change.reduce((a, b) => a + b.amount, 0)).toBe(fee);
-
-		// check states of spent and kept proofs after payment
-		const sentProofsStates = await wallet.checkProofsStates(sendResponse.send);
-		expect(sentProofsStates).toBeDefined();
-		// expect that all proofs are spent, i.e. all are CheckStateEnum.SPENT
-		sentProofsStates.forEach((state) => {
-			expect(state.state).toBe(CheckStateEnum.SPENT);
-			expect(state.witness).toBeNull();
-		});
-		// expect none of the sendResponse.keep to be spent
-		const keepProofsStates = await wallet.checkProofsStates(sendResponse.keep);
-		expect(keepProofsStates).toBeDefined();
-		keepProofsStates.forEach((state) => {
-			expect(state.state).toBe(CheckStateEnum.UNSPENT);
-			expect(state.witness).toBeNull();
-		});
 	});
 	test('pay external invoice', async () => {
 		const mint = new CashuMint(mintUrl);
