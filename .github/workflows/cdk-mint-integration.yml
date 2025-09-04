@@ -31,7 +31,6 @@ jobs:
           sleep 10
           curl localhost:3338/v1/info
 
-
       - name: Check container logs again
         run: docker logs cdk-mint
 

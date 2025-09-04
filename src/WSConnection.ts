@@ -190,6 +190,8 @@ export class WSConnection {
 		callback: (payload: TPayload) => void,
 		errorCallback: (e: Error) => void,
 	): string {
+		console.log("WS READY STATE")
+		console.log(this.ws?.readyState);
 		if (this.ws?.readyState !== 1) {
 			this._logger.error('Attempted createSubscription, but socket was not open');
 			throw new Error('Socket is not open');
