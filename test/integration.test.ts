@@ -37,6 +37,7 @@ let request: Record<string, string> | undefined;
 const mintUrl = 'http://localhost:3338';
 const unit = 'sat';
 
+const SECOND = 1000;
 const sleep = async (ms: number) => {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -371,7 +372,7 @@ describe('mint api', () => {
 		expect(res).toBe(1);
 		expect(callbackRef).toHaveBeenCalledTimes(4);
 		expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
-	});
+	}, 30*SECOND);
 	test('websocket proof state + mint quote updates', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
@@ -396,7 +397,7 @@ describe('mint api', () => {
 			wallet.swap(21, proofs);
 		});
 		mint.disconnectWebSocket();
-	}, 10000);
+	}, 30*SECOND);
 	test('mint with signed quote and payload', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
@@ -691,5 +692,5 @@ describe('Wallet Restore', () => {
 		expect(restoredProofs).toEqual(proofs);
 		expect(sumProofs(restoredProofs)).toBe(70);
 		expect(lastCounterWithSignature).toBe(7);
-	});
+	}, 30*SECOND);
 });
