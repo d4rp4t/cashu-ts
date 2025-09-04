@@ -88,7 +88,7 @@ describe('mint api', () => {
 		expect(request).toBeDefined();
 		expect(request.request).toContain('lnbc1337');
 		// it takes randomly 1-3 secs for CDK fakewallet to mark invoice as paid. at this point it should be paid in 100% cases
-		await sleep(3500);
+		await sleep(500);
 		const proofs = await wallet.mintProofs(1337, request.quote);
 		expect(proofs).toBeDefined();
 		// expect that the sum of all tokens.proofs.amount is equal to the requested amount
