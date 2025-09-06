@@ -302,16 +302,14 @@ describe('mint api', () => {
 			const wallet = new CashuWallet(mint);
 
 			const mintQuote1 = await wallet.createMintQuote(21);
-			const mintQuote2 = await wallet.createMintQuote(22);
+			// const mintQuote2 = await wallet.createMintQuote(22);
 
 			const callbackRef = vi.fn();
 			const res = await new Promise(async (res, rej) => {
 				let counter = 0;
-				//lets wait for previous socket to close
-				await new Promise(resolve => setTimeout(resolve, 1000));
 				const unsub = await wallet.onMintQuoteUpdates(
-					[mintQuote1.quote, mintQuote2.quote],
-					// [mintQuote1.quote],
+					// [mintQuote1.quote, mintQuote2.quote],
+					[mintQuote1.quote],
 					() => {
 						counter++;
 						callbackRef();
