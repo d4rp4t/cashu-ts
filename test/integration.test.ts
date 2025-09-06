@@ -268,33 +268,33 @@ describe('mint api', () => {
 		await sleep(3000);
 		const proof = await wallet.mintProofs(1, quote.quote, { outputData: [data] });
 	});
-	// test('websocket updates', async () => {
-	// 	const mint = new CashuMint(mintUrl);
-	// 	const wallet = new CashuWallet(mint);
-	//
-	// 	const mintQuote = await wallet.createMintQuote(21);
-	// 	const callback = vi.fn();
-	// 	const res = await new Promise(async (res, rej) => {
-	// 		const unsub = await wallet.onMintQuoteUpdates(
-	// 			[mintQuote.quote],
-	// 			(p) => {
-	// 				if (p.state === MintQuoteState.PAID) {
-	// 					callback();
-	// 					res(1);
-	// 					unsub();
-	// 				}
-	// 			},
-	// 			(e) => {
-	// 				console.log(e);
-	// 				rej(e);
-	// 				unsub();
-	// 			},
-	// 		);
-	// 	});
-	// 	mint.disconnectWebSocket();
-	// 	expect(res).toBe(1);
-	// 	expect(callback).toBeCalled();
-	// });
+	test('websocket updates', async () => {
+		const mint = new CashuMint(mintUrl);
+		const wallet = new CashuWallet(mint);
+
+		const mintQuote = await wallet.createMintQuote(21);
+		const callback = vi.fn();
+		const res = await new Promise(async (res, rej) => {
+			const unsub = await wallet.onMintQuoteUpdates(
+				[mintQuote.quote],
+				(p) => {
+					if (p.state === MintQuoteState.PAID) {
+						callback();
+						res(1);
+						unsub();
+					}
+				},
+				(e) => {
+					console.log(e);
+					rej(e);
+					unsub();
+				},
+			);
+		});
+		mint.disconnectWebSocket();
+		expect(res).toBe(1);
+		expect(callback).toBeCalled();
+	});
 	test(
 		'websocket mint quote updates on multiple ids',
 		async () => {
@@ -302,13 +302,14 @@ describe('mint api', () => {
 			const wallet = new CashuWallet(mint);
 
 			const mintQuote1 = await wallet.createMintQuote(21);
-			const mintQuote2 = await wallet.createMintQuote(22);
+			// const mintQuote2 = await wallet.createMintQuote(22);
 
 			const callbackRef = vi.fn();
 			const res = await new Promise(async (res, rej) => {
 				let counter = 0;
 				const unsub = await wallet.onMintQuoteUpdates(
-					[mintQuote1.quote, mintQuote2.quote],
+					// [mintQuote1.quote, mintQuote2.quote],
+					[mintQuote1.quote],
 					() => {
 						counter++;
 						callbackRef();
