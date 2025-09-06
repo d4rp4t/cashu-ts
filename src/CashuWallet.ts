@@ -1424,6 +1424,7 @@ class CashuWallet {
 		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		await this.mint.connectWebSocket();
+		await new Promise((resolve) => setTimeout(resolve, 5000))
 		if (!this.mint.webSocketConnection) {
 			throw new Error('failed to establish WebSocket connection.');
 		}
