@@ -36,7 +36,6 @@ import {
 import { handleMintInfoContactFieldDeprecated } from './legacy/nut-06';
 import { MintInfo } from './model/MintInfo';
 import { type Logger, NULL_LOGGER } from './logger';
-import { resolve } from 'path';
 
 /**
  * Class represents Cashu Mint API. This class contains Lower level functions that are implemented
@@ -852,8 +851,6 @@ class CashuMint {
 				throw new Error('Failed to connect to WebSocket...');
 			}
 		}
-		//maybe wait a sec.....
-		await new Promise((resolve)=>setTimeout(resolve, 1000));
 	}
 
 	/**
