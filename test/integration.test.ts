@@ -268,6 +268,62 @@ describe('mint api', () => {
 		const proof = await wallet.mintProofs(1, quote.quote, { outputData: [data] });
 	});
 
+	test('websocket updates', async () => {
+		const mint = new CashuMint(mintUrl);
+		const wallet = new CashuWallet(mint);
+
+		const mintQuote = await wallet.createMintQuote(21);
+		const callback = vi.fn();
+		const res = await new Promise(async (res, rej) => {
+			const unsub = await wallet.onMintQuoteUpdates(
+				[mintQuote.quote],
+				(p) => {
+					if (p.state === MintQuoteState.PAID) {
+						callback();
+						res(1);
+						unsub();
+					}
+				},
+				(e) => {
+					console.log(e);
+					rej(e);
+					unsub();
+				},
+			);
+		});
+		expect(res).toBe(1);
+		expect(callback).toBeCalled();
+	});
+
+	test(
+		'websocket proof state + mint quote updates',
+		async () => {
+			const mint = new CashuMint(mintUrl);
+			const wallet = new CashuWallet(mint);
+
+			const quote = await wallet.createMintQuote(63);
+			await new Promise((res, rej) => {
+				wallet.onMintQuotePaid(quote.quote, res, rej);
+			});
+			const proofs = await wallet.mintProofs(63, quote.quote);
+			const data = await new Promise<ProofState>((res) => {
+				wallet.onProofStateUpdates(
+					proofs,
+					(p) => {
+						if (p.state === CheckStateEnum.SPENT) {
+							res(p);
+						}
+					},
+					(e) => {
+						console.log(e);
+					},
+				);
+				wallet.swap(21, proofs);
+			});
+
+		},
+	);
+
 	test(
 		'websocket mint quote updates on multiple ids',
 		async () => {
@@ -299,67 +355,10 @@ describe('mint api', () => {
 					},
 				);
 			});
-			// mint.disconnectWebSocket();
+			mint.disconnectWebSocket();
 			expect(res).toBe(1);
 			expect(callbackRef).toHaveBeenCalledTimes(4);
 			expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
-		},
-	);
-
-	test('websocket updates', async () => {
-		const mint = new CashuMint(mintUrl);
-		const wallet = new CashuWallet(mint);
-
-		const mintQuote = await wallet.createMintQuote(21);
-		const callback = vi.fn();
-		const res = await new Promise(async (res, rej) => {
-			const unsub = await wallet.onMintQuoteUpdates(
-				[mintQuote.quote],
-				(p) => {
-					if (p.state === MintQuoteState.PAID) {
-						callback();
-						res(1);
-						unsub();
-					}
-				},
-				(e) => {
-					console.log(e);
-					rej(e);
-					unsub();
-				},
-			);
-		});
-		// mint.disconnectWebSocket();
-		expect(res).toBe(1);
-		expect(callback).toBeCalled();
-	});
-
-	test(
-		'websocket proof state + mint quote updates',
-		async () => {
-			const mint = new CashuMint(mintUrl);
-			const wallet = new CashuWallet(mint);
-
-			const quote = await wallet.createMintQuote(63);
-			await new Promise((res, rej) => {
-				wallet.onMintQuotePaid(quote.quote, res, rej);
-			});
-			const proofs = await wallet.mintProofs(63, quote.quote);
-			const data = await new Promise<ProofState>((res) => {
-				wallet.onProofStateUpdates(
-					proofs,
-					(p) => {
-						if (p.state === CheckStateEnum.SPENT) {
-							res(p);
-						}
-					},
-					(e) => {
-						console.log(e);
-					},
-				);
-				wallet.swap(21, proofs);
-			});
-			mint.disconnectWebSocket();
 		},
 	);
 	test('mint with signed quote and payload', async () => {
