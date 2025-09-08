@@ -1,5 +1,5 @@
-import { CashuMint } from '../src/CashuMint';
-import { CashuWallet } from '../src/CashuWallet';
+import { CashuMint } from '../src';
+import { CashuWallet } from '../src';
 
 import dns from 'node:dns';
 import { test, describe, expect } from 'vitest';
@@ -22,7 +22,6 @@ import {
 	getEncodedTokenV4,
 	hexToNumber,
 	numberToHexPadded64,
-	splitAmount,
 	sumProofs,
 } from '../src/utils';
 import { OutputData, OutputDataFactory } from '../src/model/OutputData';
@@ -35,7 +34,6 @@ const externalInvoices = [
 	'lnbc20u1p5tnrdtsp5xaus66jztyj4f4m9wuza7ay9994d5dals6dluvw80dduhhulgxvspp5gsdp48uz9x20etle8j7muweujzxd2w4ay2v6cwzwjy7pff44r4gqhp5jujtt4hgd57c5hskstzkjkxqtfmctfvpfc3wmt3h42a9f2p9sqcsxq9z0rgqcqpnrzjqvxr759n8jl5226n47zw6325pyffxqlpyrjh9ztswvnglhrmtcsfzrw8mqqqf2cqqqqqqqlgqqqqzhsqjq9qxpqysgq2rtnpkqzmwmuf6cw653s63552qf0hgst6xzdywkgekhz836ayrz572cm72r7ejj7w0ktgldlwfu33fpr9dxywx5wqy4tte7smpa9q4gqaaydvv',
 ];
 
-let request: Record<string, string> | undefined;
 const mintUrl = 'http://localhost:3338';
 const unit = 'sat';
 
@@ -69,7 +67,7 @@ describe('mint api', () => {
 	test('get info', async () => {
 		const mint = new CashuMint(mintUrl);
 		const info = await mint.getInfo();
-		console.log("mint info: ", info)
+		console.log('mint info: ', info);
 		expect(info).toBeDefined();
 	});
 	test('request mint', async () => {
@@ -295,72 +293,65 @@ describe('mint api', () => {
 		expect(callback).toBeCalled();
 	});
 
-	test(
-		'websocket proof state + mint quote updates',
-		async () => {
-			const mint = new CashuMint(mintUrl);
-			const wallet = new CashuWallet(mint);
+	test('websocket proof state + mint quote updates', async () => {
+		const mint = new CashuMint(mintUrl);
+		const wallet = new CashuWallet(mint);
 
-			const quote = await wallet.createMintQuote(63);
-			await new Promise((res, rej) => {
-				wallet.onMintQuotePaid(quote.quote, res, rej);
-			});
-			const proofs = await wallet.mintProofs(63, quote.quote);
-			const data = await new Promise<ProofState>((res) => {
-				wallet.onProofStateUpdates(
-					proofs,
-					(p) => {
-						if (p.state === CheckStateEnum.SPENT) {
-							res(p);
-						}
-					},
-					(e) => {
-						console.log(e);
-					},
-				);
-				wallet.swap(21, proofs);
-			});
+		const quote = await wallet.createMintQuote(63);
+		await new Promise((res, rej) => {
+			wallet.onMintQuotePaid(quote.quote, res, rej);
+		});
+		const proofs = await wallet.mintProofs(63, quote.quote);
+		const data = await new Promise<ProofState>((res) => {
+			wallet.onProofStateUpdates(
+				proofs,
+				(p) => {
+					if (p.state === CheckStateEnum.SPENT) {
+						res(p);
+					}
+				},
+				(e) => {
+					console.log(e);
+				},
+			);
+			wallet.swap(21, proofs);
+		});
+	});
 
-		},
-	);
+	test('websocket mint quote updates on multiple ids', async () => {
+		const mint = new CashuMint(mintUrl);
+		const wallet = new CashuWallet(mint);
 
-	test(
-		'websocket mint quote updates on multiple ids',
-		async () => {
-			const mint = new CashuMint(mintUrl);
-			const wallet = new CashuWallet(mint);
+		const mintQuote1 = await wallet.createMintQuote(21);
+		const mintQuote2 = await wallet.createMintQuote(22);
 
-			const mintQuote1 = await wallet.createMintQuote(21);
-			const mintQuote2 = await wallet.createMintQuote(22);
-
-			const callbackRef = vi.fn();
-			const res = await new Promise(async (res, rej) => {
-				let counter = 0;
-				const unsub = await wallet.onMintQuoteUpdates(
-					[mintQuote1.quote, mintQuote2.quote],
-					() => {
-						counter++;
-						callbackRef();
-						if (counter === 4) {
-							unsub();
-							res(1);
-						}
-					},
-					() => {
-						counter++;
-						if (counter === 4) {
-							unsub();
-							rej();
-						}
-					},
-				);
-			});
-			mint.disconnectWebSocket();
-			expect(res).toBe(1);
-			expect(callbackRef).toHaveBeenCalledTimes(4);
-			expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
-		},
-	);
+		const callbackRef = vi.fn();
+		const res = await new Promise(async (res, rej) => {
+			let counter = 0;
+			const unsub = await wallet.onMintQuoteUpdates(
+				[mintQuote1.quote, mintQuote2.quote],
+				() => {
+					counter++;
+					callbackRef();
+					if (counter === 4) {
+						unsub();
+						res(1);
+					}
+				},
+				() => {
+					counter++;
+					if (counter === 4) {
+						unsub();
+						rej();
+					}
+				},
+			);
+		});
+		mint.disconnectWebSocket();
+		expect(res).toBe(1);
+		expect(callbackRef).toHaveBeenCalledTimes(4);
+		expect(mint.webSocketConnection?.activeSubscriptions.length).toBe(0);
+	});
 	test('mint with signed quote and payload', async () => {
 		const mint = new CashuMint(mintUrl);
 		const wallet = new CashuWallet(mint);
@@ -642,22 +633,18 @@ describe('Keep Vector and Reordering', () => {
 	});
 });
 describe('Wallet Restore', () => {
-	test(
-		'Using batch restore',
-		async () => {
-			const seed = randomBytes(64);
-			const mint = new CashuMint(mintUrl);
-			const wallet = new CashuWallet(mint, { bip39seed: seed });
+	test('Using batch restore', async () => {
+		const seed = randomBytes(64);
+		const mint = new CashuMint(mintUrl);
+		const wallet = new CashuWallet(mint, { bip39seed: seed });
 
-			const mintQuote = await wallet.createMintQuote(70);
-			await sleep(3000);
-			const proofs = await wallet.mintProofs(70, mintQuote.quote, { counter: 5 });
+		const mintQuote = await wallet.createMintQuote(70);
+		await sleep(3000);
+		const proofs = await wallet.mintProofs(70, mintQuote.quote, { counter: 5 });
 
-			const { proofs: restoredProofs, lastCounterWithSignature } = await wallet.batchRestore();
-			expect(restoredProofs).toEqual(proofs);
-			expect(sumProofs(restoredProofs)).toBe(70);
-			expect(lastCounterWithSignature).toBe(7);
-		},
-		10000,
-	);
+		const { proofs: restoredProofs, lastCounterWithSignature } = await wallet.batchRestore();
+		expect(restoredProofs).toEqual(proofs);
+		expect(sumProofs(restoredProofs)).toBe(70);
+		expect(lastCounterWithSignature).toBe(7);
+	}, 10000);
 });
